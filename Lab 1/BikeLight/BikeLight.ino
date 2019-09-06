@@ -26,6 +26,7 @@ int button_pin = 7;
 // Setup state variables
 int button_val = 0;      // 0 if button isn't currently pressed, 1 if button is pressed
 int prev_button_val = 0; // Save previous value in order to tell if button has changed states
+int prev_button_press = millis(); // Time at last button press
 
 int state     = 0; // Current bike light mode to run
 int sub_state = 0; // Current state within mode - used for flashing and wave patterns
@@ -35,7 +36,7 @@ unsigned long oldLoopTime = 0;    // Past loop time in milliseconds
 unsigned long newLoopTime = 0;    // New loop time in milliseconds
 unsigned long cycleTime = 0;      // Elapsed loop cycle time
 const long controlLoopInterval = 200; // Control loop cycle time in milliseconds
-
+int debounce_time = 50; // Debounce time in milliseconds
 
 // Startup/Reset Procedure
 void setup() {
@@ -54,8 +55,9 @@ void loop() {
   button_val = digitalRead(button_pin);
 
   // Switch state on button press
-  if (checkSwitch(button_val, prev_button_val)) {
+  if (checkSwitch(button_val, prev_button_val, prev_button_press, debounce_time)) {
     state++;
+    prev_button_press = millis();
     if (state >= 7) {
       state = 0;
     }
@@ -156,9 +158,13 @@ void loop() {
   }
 }
 
-bool checkSwitch(int button_val, int prev_button_val) {
-  if (button_val == 1 && prev_button_val == 0) {
-    return true;
+bool checkSwitch(int button_val, int prev_button_val, int prev_button_press, int debounce_time) {
+  int time_since_press = millis() - prev_button_press;
+  Serial.println(time_since_press);
+  if (time_since_press > debounce_time) {
+    if (button_val == 1 && prev_button_val == 0) {
+        return true;
+    }
   } else {
     return false;
   }
@@ -166,6 +172,7 @@ bool checkSwitch(int button_val, int prev_button_val) {
 
 void resetLights() {
   // Turn all the LEDs off
+  Serial.println("here");
   digitalWrite(green_pin, LOW);
   digitalWrite(yellow_pin, LOW);
   digitalWrite(red_pin, LOW);
