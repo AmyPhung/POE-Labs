@@ -1,48 +1,59 @@
 /*
   BikeLight
-  Turns on an LED on for one second, then off for one second, repeatedly.
 
-  
+  Written by Amy Phung and Emma Mack
+
+  Contains code for a bike light that switches modes on button press. Modes
+  include:
+    Mode 1 (state Default): All lights off
+    Mode 2 (state 0): Green light on
+    Mode 3 (state 1): Yellow light on
+    Mode 4 (state 2): Red light on
+    Mode 5 (state 3): All lights on
+    Mode 6 (state 4): All lights flashing
+    Mode 7 (state 5): Wave pattern
+    Mode 8 (state 6): Stop lights - red when close to IR, yellow when medium,
+                      green when far
+
  */
 
-// Pin 13 has an LED connected on most Arduino boards.
-// Pin 11 has the LED on Teensy 2.0
-// Pin 6  has the LED on Teensy++ 2.0
-// Pin 13 has the LED on Teensy 3.0
-// give it a name:
+// Define pins
 int green_pin  = 13;
 int yellow_pin = 12;
 int red_pin    = 11;
 int button_pin = 7;
 
-int button_val = 0;
-int prev_button_val = 0;
+// Setup state variables
+int button_val = 0;      // 0 if button isn't currently pressed, 1 if button is pressed
+int prev_button_val = 0; // Save previous value in order to tell if button has changed states
 
-int state     = 0;
-int sub_state = 0;
+int state     = 0; // Current bike light mode to run
+int sub_state = 0; // Current state within mode - used for flashing and wave patterns
 
 // Timing Variables
-unsigned long oldLoopTime = 0;    //create a name for past loop time in milliseconds
-unsigned long newLoopTime = 0;    //create a name for new loop time in milliseconds
-unsigned long cycleTime = 0;      //create a name for elapsed loop cycle time
-const long controlLoopInterval = 200; //create a name for control loop cycle time in milliseconds
+unsigned long oldLoopTime = 0;    // Past loop time in milliseconds
+unsigned long newLoopTime = 0;    // New loop time in milliseconds
+unsigned long cycleTime = 0;      // Elapsed loop cycle time
+const long controlLoopInterval = 200; // Control loop cycle time in milliseconds
 
 
-// the setup routine runs once when you press reset:
+// Startup/Reset Procedure
 void setup() {
   Serial.begin(9600);
-  // initialize the digital pin as an output.
+  // Initialize the digital pins for the LEDS as outputs
   pinMode(green_pin, OUTPUT);
   pinMode(yellow_pin, OUTPUT);
   pinMode(red_pin, OUTPUT);
+  // Initialize the digitl pin for the button as an input
   pinMode(button_pin, INPUT);
 }
 
-// the loop routine runs over and over again forever:
+// Main Loop
 void loop() {
+  // Check to see if button is pressed
   button_val = digitalRead(button_pin);
-  Serial.println(button_val);
-  // Serial.println(checkSwitch);
+
+  // Switch state on button press
   if (checkSwitch(button_val, prev_button_val)) {
     state++;
     if (state >= 7) {
@@ -52,72 +63,75 @@ void loop() {
 
   prev_button_val = button_val;
 
+  // Run code for current state
   switch (state) {
-    case 0:
+    case 0: // Green light on
       resetLights();
       Serial.println("Case 0");
       digitalWrite(green_pin, HIGH);   // turn the LED on (HIGH is the voltage level)
       break;
-    case 1:
+    case 1: // Yellow light on
       resetLights();
       Serial.println("Case 1");
       digitalWrite(yellow_pin, HIGH);   // turn the LED on (HIGH is the voltage level)
       break;
-    case 2:
+    case 2: // Red light on
       resetLights();
       Serial.println("Case 2");
       digitalWrite(red_pin, HIGH);   // turn the LED on (HIGH is the voltage level)
       break;
-    case 3:
+    case 3: // All lights on
       resetLights();
       Serial.println("Case 3");
       digitalWrite(green_pin, HIGH);   // turn the LED on (HIGH is the voltage level)
       digitalWrite(yellow_pin, HIGH);   // turn the LED on (HIGH is the voltage level)
       digitalWrite(red_pin, HIGH);   // turn the LED on (HIGH is the voltage level)
       break;
-    case 4:
+    case 4:  // Flashing lights
       resetLights();
       Serial.println("Case 4");
-      newLoopTime = millis();               // get current Arduino time (50 days till wrap)
-      if (newLoopTime - oldLoopTime >= controlLoopInterval) { // if true run flight code
-        oldLoopTime = newLoopTime;          // reset time stamp
+      newLoopTime = millis(); // get current Arduino time (50 days till wrap)
+      // After specified loop time has passed, switch light sub-state
+      if (newLoopTime - oldLoopTime >= controlLoopInterval) {
+        oldLoopTime = newLoopTime; // reset time stamp
+        // Switch between all on and all off
         if (sub_state == 0) {
           sub_state = 1;
         } else {
           sub_state = 0;
         }
       }
+      // Change lights depending on sub-state
       if (sub_state == 0) {
         resetLights();
       } else {
-        digitalWrite(green_pin, HIGH);    // turn the LED off by making the voltage HIGH
-        digitalWrite(yellow_pin, HIGH);    // turn the LED off by making the voltage HIGH
-        digitalWrite(red_pin, HIGH);    // turn the LED off by making the voltage HIGH
+        digitalWrite(green_pin, HIGH);    // turn the LED on by making the voltage HIGH
+        digitalWrite(yellow_pin, HIGH);    // turn the LED on by making the voltage HIGH
+        digitalWrite(red_pin, HIGH);    // turn the LED on by making the voltage HIGH
       }
       break;
-    case 5:
+    case 5: // Light wave
       resetLights();
       Serial.println("Case 5");
-      newLoopTime = millis();               // get current Arduino time (50 days till wrap)
-      if (newLoopTime - oldLoopTime >= controlLoopInterval) { // if true run flight code
-        oldLoopTime = newLoopTime;          // reset time stamp
-        Serial.println(sub_state);
+      newLoopTime = millis(); // get current Arduino time (50 days till wrap)
+      // After specified loop time has passed, switch light sub-state
+      if (newLoopTime - oldLoopTime >= controlLoopInterval) {
+        oldLoopTime = newLoopTime; // reset time stamp
         sub_state++;
         if (sub_state >= 3) {
           sub_state = 0;
         }
       }
-
       resetLights();
       switch(sub_state) {
         case 0:
-          digitalWrite(green_pin, HIGH);    // turn the LED off by making the voltage HIGH
+          digitalWrite(green_pin, HIGH); // turn the LED on by making the voltage HIGH
           break;
         case 1:
-          digitalWrite(yellow_pin, HIGH);    // turn the LED off by making the voltage HIGH
+          digitalWrite(yellow_pin, HIGH); // turn the LED on by making the voltage HIGH
           break;
         case 2:
-          digitalWrite(red_pin, HIGH);    // turn the LED off by making the voltage HIGH
+          digitalWrite(red_pin, HIGH); // turn the LED on by making the voltage HIGH
           break;
         default:
           break;
@@ -151,7 +165,8 @@ bool checkSwitch(int button_val, int prev_button_val) {
 }
 
 void resetLights() {
-  digitalWrite(green_pin, LOW);   // turn the LED on (HIGH is the voltage level)
-  digitalWrite(yellow_pin, LOW);   // turn the LED on (HIGH is the voltage level)
-  digitalWrite(red_pin, LOW);   // turn the LED on (HIGH is the voltage level)
+  // Turn all the LEDs off
+  digitalWrite(green_pin, LOW);
+  digitalWrite(yellow_pin, LOW);
+  digitalWrite(red_pin, LOW);
 }
