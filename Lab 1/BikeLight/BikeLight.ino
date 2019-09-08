@@ -141,11 +141,11 @@ void loop() {
       resetLights();
       Serial.println("Case 6");
       int ir_val = analogRead(0);
-      if (ir_val > 200 && ir_val <= 300) {
+      if (ir_val > 300 && ir_val <= 500) {
         digitalWrite(red_pin, HIGH); // Go away, you're too close
-      } else if (ir_val > 300 && ir_val <= 400) {
+      } else if (ir_val > 200 && ir_val <= 300) {
         digitalWrite(yellow_pin, HIGH); // Ehhh, you're a tad close
-      } else if (ir_val > 400 && ir_val <= 500) {
+      } else if (ir_val > 100 && ir_val <= 200) {
         digitalWrite(green_pin, HIGH); // All good!
       } // else, I have no idea where you are
       break;
