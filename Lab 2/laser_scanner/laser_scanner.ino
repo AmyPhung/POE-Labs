@@ -28,6 +28,9 @@ void loop() {
   tilt_servo.write(90); // 180 is up, 0 is down
   IRValue = analogRead(IRPin);
   Serial.println(IRValue);
+  double IRValueIn = convertToInches(IRValue);
+  Serial.println(IRValueIn);
+
 
   /*for (tilt_pos = 90 + tilt_range; tilt_pos >= 90 - tilt_range; tilt_pos -= step_size) { // goes from 180 to 0 degrees
     tilt_servo.write(tilt_pos);              // tell servo to go to position in variable 'pos'
@@ -49,4 +52,15 @@ void loop() {
   //   myservo.write(pos);              // tell servo to go to position in variable 'pos'
   //   delay(15);                       // waits 15ms for the servo to reach the position
 */
+}
+
+double convertToInches(int x) {
+  double output;
+  // output = 0.001986*pow(x,5) - 0.09726*pow(x,4) + 2.442*pow(x,3) -
+  //          32.04*pow(x,2) + 177.6*x + 212.6;
+  // 0.0001649 x - 0.01736 x + 0.6846 x - 11.82 x + 63.62 x + 456.2
+  output = -1.324e-11*pow(x,5) + 2.416e-08*pow(x,4) - 1.756e-05*pow(x,3) +
+           0.006438*pow(x,2) - 1.243*x + 119.8;
+
+  return output;
 }
