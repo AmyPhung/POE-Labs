@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import time
 
 class ColorPlot:
     """
@@ -17,19 +18,31 @@ class ColorPlot:
 
         # Private Variables
         self._fig, self._ax = plt.subplots()
+        self._ax.set_xlim([-10,10])
+        self._ax.set_ylim([-10,10])
+        self._delay = 1 # Frequency to update plot
+        self._last_update = time.time()
+        self._new_data = np.array([[0,0,0]])
 
     def update(self, new_point):
         x, y, z = new_point
 
         self.data = np.append(self.data, np.array([new_point]), axis=0)
+        self._new_data = np.append(self._new_data, np.array([new_point]), axis=0)
 
-        scale = 200.0 # Make points bigger
-        color = self._computeColor(z) # Map Z to color value
-        self._ax.scatter(x, y, c=color, s=scale, label=color,
-                   alpha=0.3, edgecolors='none')
-        # self._ax.scatter(x,y,c=color, edgecolors='none')
-        plt.draw()
-        plt.pause(0.1)
+        if (time.time() - self._last_update) > self._delay:
+            scale = 200.0 # Make points bigger
+
+            for i in range(1, len(self._new_data)):
+                color = self._computeColor(self._new_data[i][2]) # Map Z to color value
+                self._ax.scatter(self._new_data[i][0], self._new_data[i][1],
+                                 c=color, s=scale, label=color,
+                                 alpha=0.3, edgecolors='none')
+                # self._ax.scatter(x,y,c=color, edgecolors='none')
+                plt.draw()
+            plt.pause(0.0000000000001)
+            self._last_update = time.time()
+            self._new_data = np.array([[0,0,0]])
 
     def _computeColor(self, z):
         """
