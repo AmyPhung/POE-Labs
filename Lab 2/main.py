@@ -1,8 +1,8 @@
-from modules import seriallib
-from modules import plotlib
+from modules.plotlib import ColorPlot
+from modules.seriallib import SerialConnection
 
-arduino = seriallib.SerialConnection('/dev/ttyACM1', 115200)
-plot = plotlib.ColorPlot()
+arduino = SerialConnection('/dev/ttyACM1', 115200)
+plot = ColorPlot()
 
 while True:
 	arduino.update()

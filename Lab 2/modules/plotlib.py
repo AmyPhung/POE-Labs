@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-class ColorPlot():
+class ColorPlot:
     """
     Object to plot scatterplots in realtime with z data represented as color.
 

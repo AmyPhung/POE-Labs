@@ -20,16 +20,25 @@ int IRValue = 0;
 void setup() {
   pan_servo.attach(pan_pin);  // attaches the servo on pin 9 to the servo object
   tilt_servo.attach(tilt_pin);  // attaches the servo on pin 9 to the servo object
-  Serial.begin(9600);
+  Serial.begin(115200);
 }
 
 void loop() {
   pan_servo.write(90); // 0 is right, 180 is left
   tilt_servo.write(90); // 180 is up, 0 is down
   IRValue = analogRead(IRPin);
-  Serial.println(IRValue);
   double IRValueIn = convertToInches(IRValue);
+
+
+  // TODO: Replace this
+  int pan_servo = 2;
+  int tilt_servo = 6;
+
+  Serial.println('p');
+  Serial.println(pan_servo);
+  Serial.println(tilt_servo);
   Serial.println(IRValueIn);
+
 
 
   /*for (tilt_pos = 90 + tilt_range; tilt_pos >= 90 - tilt_range; tilt_pos -= step_size) { // goes from 180 to 0 degrees
