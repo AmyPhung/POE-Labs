@@ -1,8 +1,5 @@
 import serial
 
-# For testing
-import random
-
 class SerialConnection:
     def __init__(self, port, baud):
         self.arduino = serial.Serial(port, baud, timeout=.1)
@@ -18,5 +15,3 @@ class SerialConnection:
             self.new_point = (x,y,z)
         else:
             self.new_point = None
-
-        print(self.new_point)
