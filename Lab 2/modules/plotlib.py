@@ -1,3 +1,9 @@
+"""
+By: Amy Phung and Sophie Wu
+
+Contains code for a ColorPlot object to plot scatterplots in realtime
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 import time
@@ -17,30 +23,48 @@ class ColorPlot:
         self.data = np.array([[0,0,0]])
 
         # Private Variables
-        self._fig, self._ax = plt.subplots()
+        self._fig, self._ax = plt.subplots() # Matplotlib figure and axes
         self._ax.set_xlim([-10,10])
         self._ax.set_ylim([-10,10])
-        self._delay = 1 # Frequency to update plot
+        self._delay = 1 # Frequency to update plot in seconds
         self._last_update = time.time()
         self._new_data = np.array([[0,0,0]])
 
     def update(self, new_point):
+        """
+        Adds new point to data list. If enough time has passed, also update the
+        plot
+
+        Args:
+            new_point (tuple): x,y,z cartesian point of new measurement
+        """
         x, y, z = new_point
 
+        # Add point to saved datasets
         self.data = np.append(self.data, np.array([new_point]), axis=0)
         self._new_data = np.append(self._new_data, np.array([new_point]), axis=0)
 
+        # If enough time has passed since the last plot update, then update the
+        # plot
         if (time.time() - self._last_update) > self._delay:
             scale = 200.0 # Make points bigger
 
+            # Plot all the new data points since the last plot update
             for i in range(1, len(self._new_data)):
-                color = self._computeColor(self._new_data[i][2]) # Map Z to color value
+                # Map Z value to new color value
+                color = self._computeColor(self._new_data[i][2])
+
+                # Add point to the plot
                 self._ax.scatter(self._new_data[i][0], self._new_data[i][1],
                                  c=color, s=scale, label=color,
                                  alpha=0.3, edgecolors='none')
-                # self._ax.scatter(x,y,c=color, edgecolors='none')
+                # Update plot
                 plt.draw()
+
+            # Show plot
             plt.pause(0.0000000000001)
+
+            # Reset timer and new point collector
             self._last_update = time.time()
             self._new_data = np.array([[0,0,0]])
 
