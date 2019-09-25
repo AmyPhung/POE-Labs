@@ -1,3 +1,9 @@
+"""
+By: Amy Phung and Sophie Wu
+
+Computes best fit line given a set of points and graphs output
+"""
+
 import matplotlib.pyplot as plt
 import numpy as np
 import csv
@@ -19,8 +25,6 @@ print(f)
 # Calulate best fit line
 x_new = np.linspace(x[0], x[-1], 50)
 y_new = f(x_new)
-
-
 
 plt.plot(x,y,'b*',label='Data Points')
 plt.plot(x_new, y_new, 'r-', label='Best Fit Line')
