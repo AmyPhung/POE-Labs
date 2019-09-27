@@ -11,7 +11,7 @@ import csv
 x = []
 y = []
 
-with open('ir_cal_dat.csv','r') as csvfile:
+with open('CAlibration.csv','r') as csvfile:
     plots = csv.reader(csvfile, delimiter=',')
     for row in plots:
         x.append(int(row[0]))

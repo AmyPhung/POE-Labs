@@ -78,8 +78,8 @@ double convertToInches(int x) {
       output (double): Distance in inches from the IR sensor
   */
   double output;
-  output = -1.324e-11*pow(x,5) + 2.416e-08*pow(x,4) - 1.756e-05*pow(x,3) +
-           0.006438*pow(x,2) - 1.243*x + 119.8;
+  output = -4.044e-12*pow(x,5) + 1.507e-08*pow(x,4) - 1.681e-05*pow(x,3) +
+           0.008214*pow(x,2) - 1.896*x + 187.2;
 
   return output;
 }

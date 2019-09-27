@@ -31,7 +31,9 @@ class SerialConnection:
 
     def update(self):
         data = self.arduino.readline()[:-2] # -2 to remove carraige return
-        if data == 'p': # Begin reading new point
+        print(data)
+        d = data.decode('ASCII')
+        if d == 'p': # Begin reading new point
             x = float(self.arduino.readline()[:-2])
             y = float(self.arduino.readline()[:-2])
             z = float(self.arduino.readline()[:-2])
