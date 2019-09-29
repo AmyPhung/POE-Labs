@@ -11,7 +11,10 @@ import csv
 x = []
 y = []
 
-with open('CAlibration.csv','r') as csvfile:
+x_verify = []
+y_verify = []
+
+with open('Calibration2.csv','r') as csvfile:  # File containing calibration pts
     plots = csv.reader(csvfile, delimiter=',')
     for row in plots:
         x.append(int(row[0]))
@@ -23,13 +26,22 @@ f = np.poly1d(z)
 print(f)
 
 # Calulate best fit line
-x_new = np.linspace(x[0], x[-1], 50)
-y_new = f(x_new)
+y_new = np.linspace(y[0], y[-1], 50)
+x_new = f(y_new)
 
-plt.plot(x,y,'b*',label='Data Points')
-plt.plot(x_new, y_new, 'r-', label='Best Fit Line')
-plt.xlabel('Distance from IR Sensor (in)')
-plt.ylabel('analogRead Output')
+# Plot Verification Points
+with open('Calibration1.csv','r') as csvfile: # File containing verification pts
+    plots = csv.reader(csvfile, delimiter=',')
+    for row in plots:
+        x_verify.append(int(row[0]))
+        y_verify.append(int(row[1]))
+
+
+plt.plot(y,x,'b*',label='Calibration Data Points')
+plt.plot(y_new, x_new, 'r-', label='Best Fit Line')
+plt.plot(y_verify,x_verify,'go',label='Verification Data Points')
+plt.xlabel('analogRead Output')
+plt.ylabel('Distance from IR Sensor (in)')
 plt.title('IR Calibration Curve')
 plt.legend()
 plt.show()
