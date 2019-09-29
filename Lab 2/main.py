@@ -15,8 +15,8 @@ plot = ColorPlot()
 ds = DataSaver()
 
 while True:
-	if keyboard.is_pressed(' '):
-		break
+	# if keyboard.is_pressed(' '):
+	# 	break
 
 	arduino.update()
 

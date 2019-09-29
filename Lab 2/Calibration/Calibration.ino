@@ -1,8 +1,3 @@
-#define step_size 1 // in degrees - must be an int equal to or greater than 1
-#define pan_range 15 // in degrees
-#define tilt_range 30 // in degrees
-#define scan_time 100 // in milliseconds
-
 #include <Servo.h>
 
 Servo pan_servo;  // create servo object to control pan servo
@@ -31,5 +26,4 @@ void loop() {
   IRValue = analogRead(IRPin);
 
   Serial.println(IRValue);
-  
 }

@@ -121,8 +121,8 @@ double convertY(int theta, int phi,  double rho) {
   double theta_rad;
   double phi_rad;
   theta_rad = theta * 3.14 / 180;
-  phi_rad = phi * 3.14 /90;
-  ycoord = rho * sin(3.14-theta_rad) * sin(phi_rad-3.14);
+  phi_rad = phi * 3.14 / 180;
+  ycoord = rho * sin(3.14-theta_rad) * sin(phi_rad-1.57);
   return ycoord;
 }
 
