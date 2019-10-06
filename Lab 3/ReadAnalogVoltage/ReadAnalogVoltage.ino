@@ -19,18 +19,56 @@ void setup() {
 // the loop routine runs over and over again forever:
 void loop() {
   // get the sensor voltage
-  int sensorVoltage0 = getSensorVoltage(A0);
-  int sensorVoltage1 = getSensorVoltage(A1);
-  
+  float sensorVoltage0 = getSensorVoltage(A0);
+  float sensorVoltage1 = getSensorVoltage(A1);
+  Serial.print(sensorVoltage0); Serial.print(" : "); Serial.println(sensorVoltage1);
   // normalize readings taking into account the sensor attributes
-  float sensor_norm0 = normalizeReading( 2.88, 3.9, sensorVoltage0 );
-  float sensor_norm1 = normalizeReading( 2.35, 3.45, sensorVoltage1 );
+  float sensor_norm0 = normalizeReading(0.66, 1.5, sensorVoltage0 );
+  float sensor_norm1 = normalizeReading( 0.5, 1.5, sensorVoltage1 );
   // print those values!
-  Serial.print(sensor_norm0); Serial.print(" : "); Serial.print(sensor_norm1);
+  Serial.print(sensor_norm0); Serial.print(" : "); Serial.println(sensor_norm1);
+
+
+
+  float normRightSensor = normalizeReading(0.66, 1.5, sensorVoltage0 );
+  float normLeftSensor = normalizeReading(0.5, 1.5, sensorVoltage1 );
+
+  int speedL;
+  int speedR;
+
+  int LForwards = 50;
+  int RForwards = 66;
+
+  int LStop = 0;
+  int RStop = 0;
+  
+  if (normRightSensor==1 && normLeftSensor==1) {
+    speedL = LForwards;
+    speedR = RForwards;
+  } else if (normRightSensor==1 && normLeftSensor==0) {
+    speedL = LForwards;
+    speedR = RStop;
+  } else if (normRightSensor==0 && normLeftSensor==1) {
+    speedL = LStop;
+    speedR = RForwards;
+  } else {
+    speedL = LStop;
+    speedR = RStop;
+  }
+  Serial.println("SPEEEEEED");
+  Serial.print(speedL); Serial.print(" : "); Serial.println(speedR);
+
+
+
+
+
+
+
+
 
   // determine whether to turn left or right
-  if (shouldTurnLeft(sensor_norm0, sensor_norm1) ) Serial.println(" Turn Left");
-  else Serial.println(" Turn Right");
+//  if (shouldTurnLeft(sensor_norm0, sensor_norm1) ) Serial.println(" Turn Left");
+//  else Serial.println(" Turn Right");
 
   delay(100);
 }
@@ -39,7 +77,13 @@ float normalizeReading(float sensor_min, float sensor_max, float sensor_value) {
   // take in a sensor max and min
   // make that a value from 0 to 1
 
-  return 0.0 + (sensor_value - sensor_min) * (1.0 - 0.0) / (sensor_max - sensor_min);
+//  return 0.0 + (sensor_value - sensor_min) * (1.0 - 0.0) / (sensor_max - sensor_min);
+  if (sensor_value > 1) {
+    return 1;
+  } else {
+    return 0;
+  }
+  
 
 }
 

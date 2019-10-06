@@ -11,6 +11,7 @@ D
 """
 
 import serial
+import keyboard
 
 class SerialConnection:
     """
@@ -42,8 +43,10 @@ class SerialConnection:
         # if data:
 	    #       print(data.rstrip('\n')) #strip out the new lines for now
 		# (better to do .read() in the long run for this reason
-
+        if keyboard.is_pressed(' '):
+            self.arduino.write("e")
         if (self.PID1 != self.prev_PID1 or self.PID2 != self.prev_PID2): # If PID values have been changed, send them
+            self.arduino.write("a") # disposable character - not an e
             self.arduino.write("p")
             self.arduino.write(str(self.PID1[0]))#[:3]))
             self.arduino.write("i")

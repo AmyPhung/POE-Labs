@@ -21,7 +21,7 @@ class GUIWindow:
 
         self.P2label = tk.Label(self.root, text="P2 value:")
         self.P2label.pack()
-        self.P2box = tk.Spinbox(self.root, from_=0, to=10, increment=0.1)
+        self.P2box = tk.Spinbox(self.root, from_=20, to=75, increment=1)
         self.P2box.pack()
 
         self.I2label = tk.Label(self.root, text="I2 value:")
