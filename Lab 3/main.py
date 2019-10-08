@@ -1,3 +1,7 @@
+"""
+Creates a GUI and serial connection to arduino to regularly update PID values
+"""
+
 from modules.guilib import GUIWindow
 from modules.seriallib import SerialConnection
 
@@ -6,7 +10,5 @@ gui = GUIWindow()
 
 while True:
     PIDvals = gui.update()
-    # print(PIDvals)
-    sc.PID1 = PIDvals[:3]
-    sc.PID2 = PIDvals[3:]
+    sc.PID = PIDvals
     sc.update()

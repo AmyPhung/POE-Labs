@@ -1,3 +1,12 @@
+/*
+LineFollower.ino
+
+Written by: Amy Phung and Everardo Gonzalez
+
+Contains code to run a line-following robot equipped with two IR sensors,
+an LCD screen, and two DC motors connected to an Adafruit motor driver shield
+*/
+
 #include <PID_v1.h>
 #include <Arduino.h>
 #include <Wire.h>
@@ -8,16 +17,16 @@
 // Constants
 const bool PYTHONMODE = false; // When true, use python code to set PID values
 
-const int RMIN = 180;
-const int RMAX = 340;
-const int LMIN = 235;
-const int LMAX = 380;
+const int RMIN = 180; // Average right IR reading when off line
+const int RMAX = 340; // Average right IR reading when on line
+const int LMIN = 235; // Average left IR reading when off line
+const int LMAX = 380; // Average left IR reading when on line
 
-const int VELOCITY = 30;
-const int MAXOFFSET = 30;
+const int VELOCITY = 30;  // Speed to drive forwards at
+const int MAXOFFSET = 30; // Amount to add/subtract from wheels to make turns
 
 // E-stop
-bool isEStopped = true;
+bool isEStopped = true; // Start in a safe e-stopped state
 
 // LCD Screen variables
 Adafruit_MotorShield shield = Adafruit_MotorShield();
@@ -25,14 +34,14 @@ Adafruit_DCMotor *LMotor = shield.getMotor(1);
 Adafruit_DCMotor *RMotor = shield.getMotor(2);
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
-String Pstring, Istring, Dstring;
-
 // PID variables
+String Pstring, Istring, Dstring;
 double Setpoint, Input, Output;
 double Kp=0.1, Ki=0, Kd=0;  // Goes from ~200 to ~20
 PID linePID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 
 struct pidData {
+  // Data structure to save PID values in
   float P, I, D;
   String Pstring, Istring, Dstring;
 };
@@ -43,6 +52,7 @@ PIDData pidValues;
 int LSpeed = 0;
 int RSpeed = 0;
 
+//------------------- Arduino Setup Function ----------------------------------
 void setup() {
   lcd.begin(16,2);
   Serial.begin(115200);
@@ -51,15 +61,16 @@ void setup() {
   resetLCD();
 
   if (!PYTHONMODE) {
-    pidValues = readValues();
+    pidValues = readValues(); // Use default PID values
     updateLCD(pidValues);
   }
-}
+} // setup()
 
+//---------------- Arduino Main Loop Function ----------------------------------
 void loop() {
-  if (PYTHONMODE) { 
+  if (PYTHONMODE) { // Only read from serial if connected to python code
     if(Serial.available() > 0) {
-      if (Serial.read() == 'e') {
+      if (Serial.read() == 'e') { // e will be sent for an e-stop
         isEStopped = !isEStopped;
         lcd.setCursor(6,0);
         lcd.print(isEStopped);
@@ -72,12 +83,12 @@ void loop() {
     if (isEStopped) {
       LMotor->setSpeed(0); // Speed goes from 0 255
       LMotor->run(FORWARD);  // Forward or backwards
-  
+
       RMotor->setSpeed(0); // Speed goes from 0 255
       RMotor->run(FORWARD);  // Forward or backwards
       return;
-    } 
-  } else {
+    }
+  } else { // Without serial, don't use an e-stop
     isEStopped = false;
     lcd.setCursor(6,0);
     lcd.print(isEStopped);
@@ -107,17 +118,19 @@ void loop() {
     Serial.print(LSpeed); Serial.print(" : "); Serial.println(RSpeed);
   }
 
-  
-} // loop() //////////////////////////////////////////////////////////
+} // loop()
 
-// Other functions
-
+//---------------- IR and Controls Functions -----------------------------------
 int getSensorVoltage(int pin) {
+   // Returns the current measurement on the IR sensor
    int sensorVal = analogRead(pin);
    return sensorVal;
 }
 
 int normalizeReading(int sensor_min, int sensor_max, int sensor_value) {
+  // Maps a sensor measurement between 0 and 1000. If sensor measurement maps
+  // to something lower or higher than 0 or 1000, caps the mapping to a number
+  // within that range
   int output;
   output = map(sensor_value, sensor_min, sensor_max, 0, 1000);
   if (output < 0) {
@@ -130,32 +143,38 @@ int normalizeReading(int sensor_min, int sensor_max, int sensor_value) {
 }
 
 int computeOffset(int L, int R) {
-  Serial.println("STARTING HERE");
-  // PID cannot handle both cases, so we'll manually handle left/right
+  // PID library can't handle both cases, so we'll manually handle left/right
+  // Computes offset to add/subtract from motor values to cause turns based on
+  // difference between left and right sensor measurements
   if (L - R < 0) {
     Input = L - R;
     linePID.Compute();
     if (Output > MAXOFFSET) {
       return MAXOFFSET;
-    } 
+    }
     return Output;
   } else {
     Input = R - L;
     linePID.Compute();
     if (Output > MAXOFFSET) {
       return -MAXOFFSET;
-    } 
+    }
     return -Output;
   }
 }
 
 void computeMotorSpeeds(int turnOffset) {
+  // Adds computed offset to left wheel and subtracts offset from right wheel
+  // to cause turns
   LSpeed = VELOCITY + turnOffset;
   RSpeed = VELOCITY - turnOffset;
 }
 
-// LCD Functions
+//---------------------------- LCD Functions -----------------------------------
 void resetLCD() {
+  // Sets LCD to an initial state with info on whether or not the robot is
+  // e-stopped, whether or not it's using python, and the current PID values
+  // it's using
   lcd.setCursor(0, 0);
   lcd.print("ESTOP:");
   lcd.setCursor(6,0);
@@ -172,6 +191,7 @@ void resetLCD() {
 }
 
 void updateLCD(PIDData pid) {
+  // Update the LCD with the new PID values
   lcd.setCursor(1, 1);
   lcd.print(pid.Pstring);
   lcd.setCursor(6, 1);
@@ -180,8 +200,10 @@ void updateLCD(PIDData pid) {
   lcd.print(pid.Dstring);
 }
 
-// Serial Functions
+//---------------------------- Serial Functions --------------------------------
 PIDData readSerial() {
+  // Parses the serial input from the computer and returns the PID input in the
+  // PIDData data structure.
   PIDData pid_out;
 
   char data = Serial.read();
@@ -216,6 +238,7 @@ PIDData readSerial() {
 }
 
 PIDData readValues() {
+  // Writes hard-coded PID values into a PIDData struct.
   PIDData pid_out;
   pid_out.P = Kp;
   pid_out.I = Ki;
