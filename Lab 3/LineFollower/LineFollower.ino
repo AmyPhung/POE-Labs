@@ -13,9 +13,12 @@ an LCD screen, and two DC motors connected to an Adafruit motor driver shield
 #include <Adafruit_MotorShield.h>
 #include "utility/Adafruit_MS_PWMServoDriver.h"
 #include <LiquidCrystal.h>
+#include <stdio.h> // for function sprintf
 
 // Constants
-const bool PYTHONMODE = false; // When true, use python code to set PID values
+const int PYTHONMODE = 2; // 0 - no python, free to spam serial monitor
+                              // 1 - use python to get PID values, no serial spamming
+                              // 2 - use python for data collection
 
 const int RMIN = 180; // Average right IR reading when off line
 const int RMAX = 340; // Average right IR reading when on line
@@ -34,10 +37,13 @@ Adafruit_DCMotor *LMotor = shield.getMotor(1);
 Adafruit_DCMotor *RMotor = shield.getMotor(2);
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
+// variables for recording data
+char data_out[300];
+
 // PID variables
 String Pstring, Istring, Dstring;
 double Setpoint, Input, Output;
-double Kp=0.1, Ki=0, Kd=0;  // Goes from ~200 to ~20
+double Kp=0.1, Ki=0, Kd=10;  // Goes from ~200 to ~20
 PID linePID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 
 struct pidData {
@@ -60,7 +66,7 @@ void setup() {
   shield.begin();
   resetLCD();
 
-  if (!PYTHONMODE) {
+  if (PYTHONMODE == 0) {
     pidValues = readValues(); // Use default PID values
     updateLCD(pidValues);
   }
@@ -68,7 +74,7 @@ void setup() {
 
 //---------------- Arduino Main Loop Function ----------------------------------
 void loop() {
-  if (PYTHONMODE) { // Only read from serial if connected to python code
+  if (PYTHONMODE == 1) { // Only read from serial if connected to python code
     if(Serial.available() > 0) {
       if (Serial.read() == 'e') { // e will be sent for an e-stop
         isEStopped = !isEStopped;
@@ -109,13 +115,19 @@ void loop() {
   RMotor->setSpeed(RSpeed); // Speed goes from 0 255
   RMotor->run(FORWARD);  // Forward or backwards
 
-  if (!PYTHONMODE) {
+  if (PYTHONMODE == 0) {
     Serial.println("Raw Outputs:");
     Serial.print(leftSensor); Serial.print(" : "); Serial.println(rightSensor);
     Serial.println("Normalized Outputs:");
     Serial.print(normLeftSensor); Serial.print(" : "); Serial.println(normRightSensor);
     Serial.println("Speeds:");
     Serial.print(LSpeed); Serial.print(" : "); Serial.println(RSpeed);
+  }
+  else if (PYTHONMODE == 2) {
+    char s[30];
+    snprintf(s, sizeof(s), "%i, %i, %i, %i, %i, %i, ",
+                            leftSensor, rightSensor, normRightSensor, normRightSensor, LSpeed, RSpeed);
+    Serial.println(s);
   }
 
 } // loop()
