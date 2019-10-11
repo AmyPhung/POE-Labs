@@ -126,7 +126,7 @@ void loop() {
   else if (PYTHONMODE == 2) {
     char s[30];
     snprintf(s, sizeof(s), "%i, %i, %i, %i, %i, %i, ",
-                            leftSensor, rightSensor, normRightSensor, normRightSensor, LSpeed, RSpeed);
+                            leftSensor, rightSensor, normLeftSensor, normRightSensor, LSpeed, RSpeed);
     Serial.println(s);
   }
 
